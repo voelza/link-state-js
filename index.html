@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>State DOM JS Test</title>
+  <title>Link-State-JS Test</title>
   <style>
     #app {
       font-family: Avenir, Helvetica, Arial, sans-serif;
@@ -15,18 +15,32 @@
 
     .app {
       padding: 5px;
+      margin: 5px;
     }
   </style>
 </head>
 
 <body>
+  <div>
+    <ul>
+      <li><a href="./src/examples/counter/simple/counter_simple.html">Counter Simple</a></li>
+      <li><a href="./src/examples/counter/selector/counter_selector.html">Counter Selector</a></li>
+      <li><a href="./src/examples/counter/object/counter_object.html">Counter Object</a></li>
+      <li><a href="./src/examples/counter/computed/counter_computed.html">Counter Computed</a></li>
+      <li><a href="./src/examples/counter/autolink/counter_autolink.html">Counter Autolink</a></li>
+      <li><a href="./src/examples/counter/setup/counter_setup.html">Counter Setup</a></li>
+      <li><a href="./src/examples/counter/setup_autolink/counter_setup_autolink.html">Counter Setup Autolink</a></li>
+    </ul>
+  </div>
+
+  <hr />
   <div id="app" class="app">
     <input type="color" data-state-model="color" /><span id="colorDisplay"></span>
     <div id="showResult"></div>
     <div style="display: flex; flex-direction: column; gap: 5px; width: 300px;">
       <input type="text" data-state-model="username" />
       <input type="password" data-state-model="password" />
-      <button data-state-event="submit@click">Login</button>
+      <button data-state-listener="submit@click">Login</button>
       <button id="reset">Reset</button>
       <div data-state-rendered="showResult">
         You are logged in as <span data-state="username"></span> with the password <span data-state="password"></span>
@@ -40,7 +54,7 @@
     <div style="display: flex; flex-direction: column; gap: 5px; width: 300px;">
       <input type="text" data-state-model="username" />
       <input type="password" data-state-model="password" />
-      <button data-state-event="submit@click">Login</button>
+      <button data-state-listener="submit@click">Login</button>
       <button id="reset">Reset</button>
       <div data-state-rendered="showResult">
         You are logged in as <span data-state="username"></span> with the password <span data-state="password"></span>

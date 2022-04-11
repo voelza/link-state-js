@@ -40,6 +40,7 @@ export default class RenderLink implements StateLink {
         for (const s of this.states) {
             s.unsubscribe(this);
         }
+        this.ifComment.remove();
     }
 
 }

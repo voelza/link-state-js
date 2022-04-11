@@ -15,8 +15,7 @@ export default class TextLink implements StateLink {
     }
 
     update(): void {
-        const value = this.valueFunction();
-        this.element.textContent = value;
+        this.element.textContent = this.valueFunction();
     }
 
     destroy(): void {

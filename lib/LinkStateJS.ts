@@ -154,7 +154,7 @@ export function autoLink({ selector, element: appElement = fetchElement(selector
         return links;
     }
 
-    computeElements(appElement, states, "data-state", (element: Element, state: State<any> | Function) => {
+    computeElements(appElement, states, "data-state-text", (element: Element, state: State<any> | Function) => {
         if (state instanceof Function) return;
         links.push(textState({ element, state }));
     });
@@ -162,7 +162,7 @@ export function autoLink({ selector, element: appElement = fetchElement(selector
         if (state instanceof Function) return;
         links.push(model({ element, state }));
     });
-    computeElements(appElement, states, "data-state-event", (element: Element, l: State<any> | Function, event: string | undefined) => {
+    computeElements(appElement, states, "data-state-listener", (element: Element, l: State<any> | Function, event: string | undefined) => {
         if (!(l instanceof Function)) return;
         links.push(listener({ element, trigger: event!, listener: l as (event: any) => void }));
     });
