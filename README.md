@@ -128,6 +128,23 @@ rendered({ selector: "#high", condition: () => count.value > 10, states: [count]
 listener({ selector: "#counter", trigger: "click", listener: counter });
 ```
 
+### ForEach Link
+If you have a iterable state you might want to iterate over it and render the same element as a template for each element in this state. For this you can use the `forEach` function. It takes an `element` or a `selector`, `itemName` as the name of the loop-state which then can be used within the template and the `state` which must be iterable list. Additionally you can pass states as `parentStates` which then can be used within the template of the loop.
+```html
+<div id="fruits"><span date-state-text="counter"></span><span date-state-text="name"></span></div>
+```
+```typescript
+const list = state(["apples", "bananas", "oranges"]);
+const counter = state(10);
+loop({ selector: "#fruits", itemName: "name", state: list, parentStates: {counter} });
+```
+Which will result in:
+```html
+<div id="fruits"><span date-state-text="counter">10</span><span date-state-text="name">apples</span></div>
+<div id="fruits"><span date-state-text="counter">10</span><span date-state-text="name">bananas</span></div>
+<div id="fruits"><span date-state-text="counter">10</span><span date-state-text="name">oranges</span></div>
+```
+
 ## Event Listener
 You can bind your event-listeners like you normally would by using the build-in `addEventListener`. But this framework also gives you a convenient function named `listener` to add the event-listener. One advantage is that this function als returns a link which can later be managed by this framework. It takes in an `element` or a `selector`, a `trigger` which are the DOM event triggers like "click", "input", "change" etc. and also a `listener` which will be called whenever the event occurs on the element. 
 ```html
@@ -165,6 +182,7 @@ The following `data-state-*` attribute are supported:
 - `data-state-model` to create a [model link](#model-like) like you would with the `model` function. The given value must match one of the state names.
 - `data-state-listener` to create a event-listener. The pattern must be like this `methodName@trigger`, so for example: `counter@click`. The method with the given trigger will automatically bind to the element with the `listener` function you can see [here](#event-listener).
 - `data-state-rendered` to create a [render link](#render-link) like you would with the `rendered` function. The given value must match a boolean-typed state with the given name.
+- `data-state-foreach` to create a [foreach link](#foreach-link) like you would with the `forEach` function. The pattern must match `iterable@loopValueName` where the first refers to the name of an iterable state and the second is the name of the loop value which you can use with `data-data-*` attributes.
 - `data-state-setup` the autoLink version of the `setup` function and is a bit more advanced. See [Setup Function](#setup-function) to read more.
 
 ## Setup Function

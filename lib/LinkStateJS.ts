@@ -4,6 +4,7 @@ import ModelLink from "./links/ModelLink";
 import RenderLink from "./links/RenderLink";
 import StateLink from "./links/StateLink";
 import TextLink from "./links/TextLink";
+import LoopLink from "./links/LoopLink";
 import WatcherLink from "./links/WatcherLink";
 import ComputedState from "./states/ComputedState";
 import MutableState from "./states/MutableState";
@@ -118,13 +119,25 @@ export function rendered({ selector, element = fetchElement(selector!), conditio
     return renderLink;
 }
 
+export type LoopLinkData = {
+    element?: Element,
+    selector?: string,
+    itemName: string,
+    state: State<Iterable<any>>,
+    parentStates?: Object
+}
+export function loop({ selector, element = fetchElement(selector!), itemName, state, parentStates = {} }: LoopLinkData): LoopLink {
+    const loopLink = new LoopLink(element, itemName, state, parentStates);
+    state.subscribe(loopLink);
+    return loopLink;
+}
+
 export type ListenerData = {
     element?: Element
     selector?: string,
     trigger: string,
     listener: (event: any) => void
 };
-
 export function listener({ selector, element = fetchElement(selector!), trigger: eventName, listener }: ListenerData): EventListenerLink {
     return new EventListenerLink(element, eventName, listener);
 }
@@ -132,7 +145,7 @@ export function listener({ selector, element = fetchElement(selector!), trigger:
 export type SetupInput = {
     element?: Element,
     selector?: string,
-    setupFunction: (state: SetupState) => Object | undefined
+    setupFunction: (state: SetupState) => Object | void
 };
 export type SetupState = {
     element: Element
@@ -169,10 +182,13 @@ export function autoLink({ selector, element: appElement = fetchElement(selector
         setup({ element, setupFunction: setupFunction as (state: SetupState) => Object | undefined }).forEach(l => links.push(l));
         skipFurtherLinking = true;
     });
-    if (skipFurtherLinking) {
-        return links;
-    }
+    if (skipFurtherLinking) return links;
 
+    computeElements(appElement, states, "data-state-foreach", (element: Element, state: State<any> | Function, itemName: string | undefined) => {
+        if (state instanceof Function || !itemName) return;
+        element.removeAttribute("data-state-foreach");
+        links.push(loop({ element, state, itemName, parentStates: states }));
+    });
     computeElements(appElement, states, "data-state-text", (element: Element, state: State<any> | Function) => {
         if (state instanceof Function) return;
         links.push(textState({ element, state }));
@@ -199,11 +215,11 @@ export function autoLink({ selector, element: appElement = fetchElement(selector
 
 function computeElements(element: Element, states: any, attribute: string, computer: (element: Element, state: State<any> | Function, event: string | undefined) => void) {
     for (const ele of fetchAllElements(element, `[${attribute}]`)) {
-        const [stateName, event] = ele.getAttribute(attribute)!.split("@");
+        const [stateName, companion] = ele.getAttribute(attribute)!.split("@");
         const state = states[stateName];
         if (!state) {
             continue;
         }
-        computer(ele, state, event);
+        computer(ele, state, companion);
     }
 }

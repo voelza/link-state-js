@@ -15,7 +15,7 @@ export default class RenderLink implements StateLink {
         this.condition = condition;
         this.states = states;
 
-        this.ifComment = document.createComment("state-dom-js-if");
+        this.ifComment = document.createComment("link-state-js-if");
         insertBefore(this.ifComment, element);
         this.update();
     }
