@@ -4,6 +4,7 @@ import ModelLink from "./links/ModelLink";
 import RenderLink from "./links/RenderLink";
 import StateLink from "./links/StateLink";
 import TextLink from "./links/TextLink";
+import WatcherLink from "./links/WatcherLink";
 import ComputedState from "./states/ComputedState";
 import MutableState from "./states/MutableState";
 import State from "./states/State";
@@ -18,6 +19,14 @@ export function computed<T>(computer: () => T, ...states: State<any>[]): Compute
         s.subscribe(computedState);
     }
     return computedState;
+}
+
+export function watch(watcher: () => void, ...states: State<any>[]): WatcherLink {
+    const watcherLink = new WatcherLink(watcher, ...states);
+    for (const s of states) {
+        s.subscribe(watcherLink);
+    }
+    return watcherLink;
 }
 
 let parent: Element | Document = document;

@@ -219,5 +219,14 @@ const counterSetup = () => {
 
 autoLink({ selector: "body", states: { counterSetup } });
 ```
+## Watch
+Sometimes you want to watch state changes and react to them. You can do this by using the `watch` function to create a WatchLink. The `watch` function takes in a `watcher` function which will trigger if one of the given `states` will change.
+```typescript
+const counter = state(0);
+watch(() => {
+    console.log(counter.value);
+}, counter);
+```
+
 ## Destroy Function
 The `destroy` function takes in an array of links which then will be destroyed. Each type of link has a unique destroy mechanism, but for most of the links it simply means that they will unsubscribe from their given states and no longer update whenever the states update. But some have specially logic like listeners, which also remove themself from the DOM elements. If you want to be sure that a link was cleanly removed call the `destroy` function on a link instance or use this function to destroy multiple links at once.
