@@ -89,10 +89,17 @@ textState({ selector: "#count", state: count });
 ```
 
 ### Attribute Link
-To create a text link use the `attribute` function. It takes in an `element` or a `selector`, the name of the attribute as `name`, a function `value` which returns the value of the attribute and the `states` on which this link should update.
+To create a attribute link use the `attribute` function. It takes in an `element` or a `selector`, the name of the attribute as `name`, a function `value` which returns the value of the attribute and the `states` on which this link should update.
 ```typescript
 const color = state("#a1dda8");
 attribute({ selector: "body", name: "style", value: () => `background-color: ${color.value};`, states: [color] });
+```
+
+### Attribute State
+If you only want to link the state of a single state to an element you can use `attributeLink` to create a attribute link. It takes in an `element` or a `selector`, the `name` of the attribute and the `state` which will be used to set the attribute on the element and which will trigger a rerender if it updates.
+```typescript
+const value = state("This is the value");
+attribute({ selector: "body", name: "value", state: value });
 ```
 
 ### Model Link
@@ -153,14 +160,15 @@ autoLink({ selector: "body", states: { count, counter } });
 ```
 
 The following `data-state-*` attribute are supported:
-- `data-state-text` to create a [textState link](###textstate-link) like you would with the `textState` function. The given value must match one of the state names.
-- `data-state-model` to create a [model link](###model-like) like you would with the `model` function. The given value must match one of the state names.
-- `data-state-listener` to create a event-listener. The pattern must be like this `methodName@trigger`, so for example: `counter@click`. The method with the given trigger will automatically bind to the element with the `listener` function you can see [here](##event-listener).
-- `data-state-rendered` to create a [render link](###render-link) like you would with the `rendered` function. The given value must match a boolean-typed state with the given name.
-- `data-state-setup` the autoLink version of the `setup` function and is a bit more advanced. See [Setup Function](##setup-function) to read more.
+- `data-state-text` to create a [textState link](#textstate-link) like you would with the `textState` function. The given value must match one of the state names.
+- `data-state-attribute` to create a [attribute link](#attribute-link) like you would with `attributeState` function. Must have the pattern `stateName@attributeName` and then will bind the state with the given state name to the given attribute name. For example: `counter@value` will bind the "counter" state to the "value" attribute.
+- `data-state-model` to create a [model link](#model-like) like you would with the `model` function. The given value must match one of the state names.
+- `data-state-listener` to create a event-listener. The pattern must be like this `methodName@trigger`, so for example: `counter@click`. The method with the given trigger will automatically bind to the element with the `listener` function you can see [here](#event-listener).
+- `data-state-rendered` to create a [render link](#render-link) like you would with the `rendered` function. The given value must match a boolean-typed state with the given name.
+- `data-state-setup` the autoLink version of the `setup` function and is a bit more advanced. See [Setup Function](#setup-function) to read more.
 
 ## Setup Function
-The setup function can be used to scope your states and links to a single element. Sometimes you have a list of elements which all operate the same but need their own independed states and links. In this case you can use the `setup` function. It takes in an `element` or a `selector` and a `setupFunction` which will be called in a scoped context in which all the link functions like `text`, `attribute`, `model` or `rendered` are automatically scoped to the given element of the `setup` function. You can also return an object at the end of the `setup` function which encapsulates states and function which then will be linked with the [`autoLink`](##auto-link) function.
+The setup function can be used to scope your states and links to a single element. Sometimes you have a list of elements which all operate the same but need their own independed states and links. In this case you can use the `setup` function. It takes in an `element` or a `selector` and a `setupFunction` which will be called in a scoped context in which all the link functions like `text`, `attribute`, `model` or `rendered` are automatically scoped to the given element of the `setup` function. You can also return an object at the end of the `setup` function which encapsulates states and function which then will be linked with the [`autoLink`](#auto-link) function.
 You can use it like this:
 ```html
 <div id="counter1">

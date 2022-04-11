@@ -48,12 +48,12 @@ export function text({ selector, element = fetchElement(selector!), text, states
     return textLink;
 }
 
-export type TextStateData = {
+export type TextStateLinkData = {
     element?: Element
     selector?: string,
     state: State<any>
 };
-export function textState({ selector, element = fetchElement(selector!), state }: TextStateData): TextLink {
+export function textState({ selector, element = fetchElement(selector!), state }: TextStateLinkData): TextLink {
     const textLink = new TextLink(element, () => state.value, [state]);
     state.subscribe(textLink);
     return textLink;
@@ -72,6 +72,16 @@ export function attribute({ selector, element = fetchElement(selector!), name, v
         s.subscribe(attributeLink);
     }
     return attributeLink;
+}
+
+export type AttributeStateLinkData = {
+    element?: Element
+    selector?: string,
+    name: string,
+    state: State<any>
+};
+export function attributeState({ selector, element = fetchElement(selector!), name, state }: AttributeStateLinkData): AttributeLink {
+    return attribute({ element, name, value: () => `${state.value}`, states: [state] });
 }
 
 export type ModelStateData = {
@@ -158,13 +168,17 @@ export function autoLink({ selector, element: appElement = fetchElement(selector
         if (state instanceof Function) return;
         links.push(textState({ element, state }));
     });
+    computeElements(appElement, states, "data-state-attribute", (element: Element, state: State<any> | Function, attribute: string | undefined) => {
+        if (state instanceof Function || !attribute) return;
+        links.push(attributeState({ element, name: attribute, state }));
+    });
     computeElements(appElement, states, "data-state-model", (element: Element, state: State<any> | Function) => {
         if (state instanceof Function) return;
         links.push(model({ element, state }));
     });
     computeElements(appElement, states, "data-state-listener", (element: Element, l: State<any> | Function, event: string | undefined) => {
-        if (!(l instanceof Function)) return;
-        links.push(listener({ element, trigger: event!, listener: l as (event: any) => void }));
+        if (!(l instanceof Function) || !event) return;
+        links.push(listener({ element, trigger: event, listener: l as (event: any) => void }));
     });
     computeElements(appElement, states, "data-state-rendered", (element: Element, state: State<any> | Function) => {
         if (state instanceof Function) return;

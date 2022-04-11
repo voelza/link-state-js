@@ -22,7 +22,7 @@ export default class AttributeLink implements StateLink {
 
     update(): void {
         const value = this.valueFunction();
-        this.element.setAttribute(this.attributeName, [this.staticValue, value].join(" "));
+        this.element.setAttribute(this.attributeName, this.staticValue ? [this.staticValue, value].join(" ") : value);
     }
 
     destroy(): void {
