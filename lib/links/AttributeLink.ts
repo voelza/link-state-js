@@ -52,7 +52,7 @@ export default class AttributeLink implements StateLink {
     update(): void {
         this.element.removeAttribute(this.attributeName);
         const value = this.valueFunction();
-        if (!this.isBooleanAttribute || value === "true") {
+        if (!this.isBooleanAttribute || value) {
             this.element.setAttribute(this.attributeName, this.staticValue ? [this.staticValue, value].join(" ") : value);
         }
     }

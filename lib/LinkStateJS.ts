@@ -9,6 +9,52 @@ import WatcherLink from "./links/WatcherLink";
 import ComputedState from "./states/ComputedState";
 import MutableState from "./states/MutableState";
 import State from "./states/State";
+import { getObjName, getValue } from "./utils/PathHelper";
+
+Object.defineProperty(Object.prototype, "setValueForKey", {
+    value: function (value: any, key: string) { this[key] = value; }
+});
+Object.defineProperty(Object.prototype, "setValueForPath", {
+    value: function (keyPath: string, value: any): void {
+        if (keyPath == null) {
+            return;
+        }
+
+        if (keyPath.indexOf('.') === -1) {
+            this.setValueForKey(value, keyPath);
+            return;
+        }
+
+        const chain: string[] = keyPath.split('.');
+        const firstKey: string | undefined = chain.shift();
+        const shiftedKeyPath: string = chain.join('.');
+
+        if (firstKey) {
+            this[firstKey].setValueForPath(shiftedKeyPath, value);
+        }
+    }
+});
+Object.defineProperty(Object.prototype, "getValueForKey", {
+    value: function (key: string): void {
+        return this[key];
+    }
+});
+Object.defineProperty(Object.prototype, "getValueForPath", {
+    value: function (keyPath: string): any {
+        if (keyPath == null) return this;
+        if (keyPath.indexOf('.') === -1) {
+            return this.getValueForKey(keyPath);
+        }
+
+        var chain: string[] = keyPath.split('.');
+        var firstKey: string | undefined = chain.shift();
+        var shiftedKeyPath: string = chain.join('.');
+
+        if (firstKey) {
+            return this[firstKey].getValueForPath(shiftedKeyPath);
+        }
+    }
+});
 
 export function state<T>(value: T): State<T> {
     return new MutableState(value);
@@ -97,10 +143,11 @@ export function attributeState({ selector, element = fetchElement(selector!), na
 export type ModelStateData = {
     element?: Element
     selector?: string,
-    state: State<any>
+    state: State<any>,
+    statePath?: string | undefined
 };
-export function model({ selector, element = fetchElement(selector!), state }: ModelStateData): ModelLink {
-    const modelLink = new ModelLink(element, state);
+export function model({ selector, element = fetchElement(selector!), state, statePath }: ModelStateData): ModelLink {
+    const modelLink = new ModelLink(element, state, statePath);
     state.subscribe(modelLink);
     return modelLink;
 }
@@ -177,43 +224,43 @@ export type AutoLinkData = {
 export function autoLink({ selector, element: appElement = fetchElement(selector!), states }: AutoLinkData): StateLink[] {
     const links: StateLink[] = [];
     let skipFurtherLinking = false;
-    computeElements(appElement, states, "data-state-setup", (element: Element, setupFunction: State<any> | Function) => {
-        if (!(setupFunction instanceof Function)) return;
+    computeElements(appElement, states, "data-state-setup", (element: Element, { listener: setupFunction }) => {
+        if (!setupFunction) return;
         setup({ element, setupFunction: setupFunction as (state: SetupState) => Object | undefined }).forEach(l => links.push(l));
         skipFurtherLinking = true;
     });
     if (skipFurtherLinking) return links;
 
-    computeElements(appElement, states, "data-state-foreach", (element: Element, state: State<any> | Function, itemName: string | undefined) => {
-        if (state instanceof Function || !itemName) return;
+    computeElements(appElement, states, "data-state-foreach", (element: Element, { state, companion: itemName }) => {
+        if (!state || !itemName) return;
         element.removeAttribute("data-state-foreach");
         links.push(loop({ element, state, itemName, parentStates: states }));
     });
-    computeElements(appElement, states, "data-state-text", (element: Element, state: State<any> | Function) => {
-        if (state instanceof Function) return;
-        links.push(textState({ element, state }));
+    computeElements(appElement, states, "data-state-text", (element: Element, { state, statePath }) => {
+        if (!state) return;
+        links.push(text({ element, text: () => getValue(state.value, statePath), states: [state] }));
     });
-    computeElements(appElement, states, "data-state-attribute", (element: Element, state: State<any> | Function, attribute: string | undefined) => {
-        if (state instanceof Function || !attribute) return;
-        links.push(attributeState({ element, name: attribute, state }));
+    computeElements(appElement, states, "data-state-attribute", (element: Element, { state, companion: attr, statePath }) => {
+        if (!state || !attr) return;
+        links.push(attribute({ element, name: attr, value: () => getValue(state.value, statePath), states: [state] }));
     });
-    computeElements(appElement, states, "data-state-model", (element: Element, state: State<any> | Function) => {
-        if (state instanceof Function) return;
-        links.push(model({ element, state }));
+    computeElements(appElement, states, "data-state-model", (element: Element, { state, statePath }) => {
+        if (!state) return;
+        links.push(model({ element, state, statePath }));
     });
-    computeElements(appElement, states, "data-state-listener", (element: Element, l: State<any> | Function, event: string | undefined) => {
-        if (!(l instanceof Function) || !event) return;
-        links.push(listener({ element, trigger: event, listener: l as (event: any) => void }));
+    computeElements(appElement, states, "data-state-listener", (element: Element, { listener: l, companion: trigger }) => {
+        if (!l || !trigger) return;
+        links.push(listener({ element, trigger, listener: l as (event: any) => void }));
     });
-    computeElements(appElement, states, "data-state-rendered", (element: Element, state: State<any> | Function) => {
-        if (state instanceof Function) return;
-        links.push(rendered({ element, condition: () => state.value, states: [state] }));
+    computeElements(appElement, states, "data-state-rendered", (element: Element, { state, statePath }) => {
+        if (!state) return;
+        links.push(rendered({ element, condition: () => getValue(state.value, statePath), states: [state] }));
     });
 
     return links;
 }
 
-function computeElements(element: Element, states: any, attribute: string, computer: (element: Element, state: State<any> | Function, event: string | undefined) => void) {
+function computeElements(element: Element, states: any, attribute: string, computer: (element: Element, result: StateLookupResult) => void) {
     for (const ele of fetchAllElements(element, `[${attribute}]`)) {
         for (let attr of ele.getAttribute(attribute)!.split(";")) {
             attr = attr.trim();
@@ -223,13 +270,15 @@ function computeElements(element: Element, states: any, attribute: string, compu
                 if (!state) {
                     continue;
                 }
-                computer(ele, state, attr.substring(attrBraketEndIndex + 2).trim());
+                computer(ele, {
+                    state, companion: attr.substring(attrBraketEndIndex + 2).trim()
+                });
             } else {
-                const { state, companion } = stateLookup(attr, states);
-                if (!state) {
+                const result = stateLookup(attr, states);
+                if (!result.state && !result.listener) {
                     continue;
                 }
-                computer(ele, state, companion);
+                computer(ele, result);
             }
         }
     }
@@ -245,24 +294,31 @@ function computedObjectState(attr: string, states: any): ComputedState<any> | un
     }
     if (stateLookupResults.length > 0) {
         // @ts-ignore
-        const states: State<any>[] = stateLookupResults
-            .map(r => r.state)
-            .filter(s => !(s instanceof Function));
+        const states: State<any>[] = stateLookupResults.map(r => r.state);
         // @ts-ignore
-        return computed(() => stateLookupResults.map(({ state, companion }) => `${companion}:${state.value}`).join(";"), ...states);
+        return computed(() => stateLookupResults.map(({ state, companion, statePath }) => `${companion}:${getValue(state.value, statePath)}`).join(";"), ...states);
     }
     return undefined;
 }
 
 type StateLookupResult = {
-    state: State<any> | Function | undefined,
+    state?: State<any> | undefined,
+    listener?: Function | undefined,
+    statePath?: string | undefined,
     companion: string | undefined;
 }
 function stateLookup(attr: string, states: any): StateLookupResult {
     const [stateName, companion] = attr.split("@");
-    const state = states[stateName];
+    let state = states[getObjName(stateName)];
+    let listener = undefined;
+    if (state instanceof Function) {
+        listener = state;
+        state = undefined;
+    }
     return {
         state,
+        listener,
+        statePath: stateName,
         companion
     }
 }

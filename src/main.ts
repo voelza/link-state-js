@@ -1,4 +1,4 @@
-import { attribute, listener, textState, state, setup, autoLink } from "../lib/LinkStateJS";
+import { attribute, listener, textState, state, setup, autoLink, model } from "../lib/LinkStateJS";
 
 const s = () => {
     const username = state("");
@@ -25,8 +25,6 @@ const s = () => {
     });
 
     const color = state("#a1dda8");
-    const color2 = state("#f7f7f7");
-    const color3 = state("#000000");
     textState({ selector: "#colorDisplay", state: color });
     attribute({ selector: ".app", name: "style", value: () => `background-color: ${color.value};`, states: [color] });
 
@@ -34,9 +32,13 @@ const s = () => {
         console.log("eyo");
     };
 
-    const height = state(5);
-    const width = state(1);
-    return { username, password, submit, color, showResult, log, color2, color3, height, width };
+    const textAreaProps = state({
+        height: 5,
+        width: 1,
+        color: "#f7f7f7",
+        backgroundColor: "#000000"
+    })
+    return { username, password, submit, color, showResult, log, textAreaProps };
 };
 
 setup({ selector: "#app", setupFunction: s });

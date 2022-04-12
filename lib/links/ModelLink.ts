@@ -1,4 +1,5 @@
 import State from "../states/State";
+import { getValue } from "../utils/PathHelper";
 import StateLink from "./StateLink";
 
 export default class AttributeLink implements StateLink {
@@ -6,16 +7,26 @@ export default class AttributeLink implements StateLink {
     private element: Element;
     private targetAttribute: string;
     private state: State<any>;
+    private statePath: string | undefined;
     private eventListener: (event: any) => void;
 
-    constructor(element: Element, state: State<any>) {
+
+    constructor(element: Element, state: State<any>, statePath: string | undefined = undefined) {
         this.element = element;
         this.state = state;
+
+        const dotIndex = statePath?.indexOf(".");
+        this.statePath = dotIndex && dotIndex !== -1 ? statePath?.substring(dotIndex + 1) : undefined;
+
         this.targetAttribute = element.getAttribute("type") === "checkbox" ? "checked" : "value";
         this.eventListener = (event: any) => {
             const target: any | null = event.target;
             if (target) {
-                this.state.value = target[this.targetAttribute];
+                if (this.statePath) {
+                    this.state.value.setValueForPath(this.statePath, target[this.targetAttribute]);
+                } else {
+                    this.state.value = target[this.targetAttribute];
+                }
             }
         }
 
@@ -24,7 +35,7 @@ export default class AttributeLink implements StateLink {
     }
 
     update(): void {
-        (this.element as any)[this.targetAttribute] = this.state.value;
+        (this.element as any)[this.targetAttribute] = this.state.value?.getValueForPath(this.statePath);
     }
 
     destroy(): void {
