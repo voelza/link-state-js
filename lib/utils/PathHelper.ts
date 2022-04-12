@@ -1,5 +1,5 @@
 export function getValue(obj: any, path: string | undefined): any {
-    if (!path) {
+    if (!path || !obj) {
         return obj;
     }
 
