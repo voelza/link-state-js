@@ -248,9 +248,9 @@ export function autoLink({ selector, element: appElement = fetchElement(selector
         if (!state) return;
         links.push(model({ element, state, statePath }));
     });
-    computeElements(appElement, states, "data-state-listener", (element: Element, { listener: l, companion: trigger }) => {
+    computeElements(appElement, states, "data-state-listener", (element: Element, { listener: l, companion: trigger, statePath }) => {
         if (!l || !trigger) return;
-        links.push(listener({ element, trigger, listener: l as (event: any) => void }));
+        links.push(listener({ element, trigger, listener: parameterListener(l, statePath, states) as (event: any) => void }));
     });
     computeElements(appElement, states, "data-state-rendered", (element: Element, { state, statePath }) => {
         if (!state) return;
@@ -299,6 +299,28 @@ function computedObjectState(attr: string, states: any): ComputedState<any> | un
         return computed(() => stateLookupResults.map(({ state, companion, statePath }) => `${companion}:${getValue(state.value, statePath)}`).join(";"), ...states);
     }
     return undefined;
+}
+
+function parameterListener(listener: Function, statePath: string | undefined, states: any): Function {
+    const bracketIndex: number | undefined = statePath?.indexOf("(");
+    if (bracketIndex && bracketIndex !== -1) {
+        const paramStates: StateLookupResult[] = [];
+        for (const param of statePath?.substring(bracketIndex + 1, statePath?.indexOf(")"))?.split(",") || []) {
+            const stateResult: StateLookupResult = stateLookup(param, states);
+            if (stateResult.state) {
+                paramStates.push(stateResult);
+            }
+        }
+
+        return (event: any) => {
+            const args: State<any>[] = [];
+            for (const paramState of paramStates) {
+                args.push(paramState.state!.value);
+            }
+            listener(...args, event)
+        };
+    }
+    return listener;
 }
 
 type StateLookupResult = {

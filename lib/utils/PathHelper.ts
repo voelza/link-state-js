@@ -37,5 +37,10 @@ export function getObjName(path: string) {
     if (dotIndex !== -1) {
         return path.substring(0, dotIndex);
     }
+
+    const bracketIndex = path.indexOf("(");
+    if (bracketIndex !== -1) {
+        return path.substring(0, bracketIndex);
+    }
     return path;
 }
