@@ -1,4 +1,4 @@
-import { attribute, listener, textState, state, setup, autoLink, model } from "../lib/LinkStateJS";
+import { attribute, listener, textState, state, setup, autoLink } from "../lib/LinkStateJS";
 
 const s = () => {
     const username = state("");

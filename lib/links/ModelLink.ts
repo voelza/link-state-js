@@ -1,5 +1,4 @@
 import State from "../states/State";
-import { getValue } from "../utils/PathHelper";
 import StateLink from "./StateLink";
 
 export default class AttributeLink implements StateLink {
