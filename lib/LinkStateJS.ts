@@ -215,13 +215,54 @@ export function autoLink({ selector, element: appElement = fetchElement(selector
 
 function computeElements(element: Element, states: any, attribute: string, computer: (element: Element, state: State<any> | Function, event: string | undefined) => void) {
     for (const ele of fetchAllElements(element, `[${attribute}]`)) {
-        for (const attr of ele.getAttribute(attribute)!.split(";")) {
-            const [stateName, companion] = attr.trim().split("@");
-            const state = states[stateName];
-            if (!state) {
-                continue;
+        for (let attr of ele.getAttribute(attribute)!.split(";")) {
+            attr = attr.trim();
+            const attrBraketEndIndex = attr.indexOf(")");
+            if (attr.startsWith("(") && attrBraketEndIndex !== -1) {
+                const state = computedObjectState(attr, states);
+                if (!state) {
+                    continue;
+                }
+                computer(ele, state, attr.substring(attrBraketEndIndex + 2).trim());
+            } else {
+                const { state, companion } = stateLookup(attr, states);
+                if (!state) {
+                    continue;
+                }
+                computer(ele, state, companion);
             }
-            computer(ele, state, companion);
         }
+    }
+}
+
+function computedObjectState(attr: string, states: any): ComputedState<any> | undefined {
+    const stateLookupResults: StateLookupResult[] = [];
+    for (const objectAttr of attr.substring(1, attr.indexOf(")")).trim().split(",")) {
+        const result = stateLookup(objectAttr.trim(), states);
+        if (result.companion && result.state) {
+            stateLookupResults.push(result);
+        }
+    }
+    if (stateLookupResults.length > 0) {
+        // @ts-ignore
+        const states: State<any>[] = stateLookupResults
+            .map(r => r.state)
+            .filter(s => !(s instanceof Function));
+        // @ts-ignore
+        return computed(() => stateLookupResults.map(({ state, companion }) => `${companion}:${state.value}`).join(";"), ...states);
+    }
+    return undefined;
+}
+
+type StateLookupResult = {
+    state: State<any> | Function | undefined,
+    companion: string | undefined;
+}
+function stateLookup(attr: string, states: any): StateLookupResult {
+    const [stateName, companion] = attr.split("@");
+    const state = states[stateName];
+    return {
+        state,
+        companion
     }
 }
