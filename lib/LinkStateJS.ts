@@ -215,11 +215,13 @@ export function autoLink({ selector, element: appElement = fetchElement(selector
 
 function computeElements(element: Element, states: any, attribute: string, computer: (element: Element, state: State<any> | Function, event: string | undefined) => void) {
     for (const ele of fetchAllElements(element, `[${attribute}]`)) {
-        const [stateName, companion] = ele.getAttribute(attribute)!.split("@");
-        const state = states[stateName];
-        if (!state) {
-            continue;
+        for (const attr of ele.getAttribute(attribute)!.split(";")) {
+            const [stateName, companion] = attr.trim().split("@");
+            const state = states[stateName];
+            if (!state) {
+                continue;
+            }
+            computer(ele, state, companion);
         }
-        computer(ele, state, companion);
     }
 }

@@ -44,7 +44,8 @@
       <button data-state-listener="submit@click">Login</button>
       <button id="reset">Reset</button>
       <div data-state-rendered="showResult">
-        You are logged in as <span data-state="username"></span> with the password <span data-state="password"></span>
+        You are logged in as <span data-state-text="username"></span> with the password <span
+          data-state-text="password"></span>
       </div>
     </div>
   </div>
@@ -55,11 +56,23 @@
     <div style="display: flex; flex-direction: column; gap: 5px; width: 300px;">
       <input type="text" data-state-model="username" />
       <input type="password" data-state-model="password" />
-      <button data-state-listener="submit@click">Login</button>
+      <button data-state-listener="submit@click;log@click">Login</button>
       <button id="reset">Reset</button>
       <div data-state-rendered="showResult">
-        You are logged in as <span data-state="username"></span> with the password <span data-state="password"></span>
+        You are logged in as <span data-state-text="username"></span> with the password <span
+          data-state-text="password"></span>
       </div>
+      <hr />
+      More Colors:
+      <div style="display:flex;">
+        <input type="color" data-state-model="color2" />
+        <input type="color" data-state-model="color3" />
+        <input type="number" min="1" max="20" data-state-model="height" />
+        <input type="number" min="1" max="20" data-state-model="width" />
+      </div>
+      <!--color2@color; color3@background-color-->
+      <textarea data-state-attribute="height@rows; width@cols">Change the colors, width and height above!
+      </textarea>
     </div>
   </div>
   <script type="module" src="/src/main.ts"></script>

@@ -185,6 +185,8 @@ The following `data-state-*` attribute are supported:
 - `data-state-foreach` to create a [foreach link](#foreach-link) like you would with the `forEach` function. The pattern must match `iterable@loopValueName` where the first refers to the name of an iterable state and the second is the name of the loop value which you can use with `data-data-*` attributes.
 - `data-state-setup` the autoLink version of the `setup` function and is a bit more advanced. See [Setup Function](#setup-function) to read more.
 
+It is possible to pass multiple values to each attribute by using the `;` as a seperator. This is especially necessary for attributes like this `data-state-attribute="widthState@with;heightState@height"`.
+
 ## Setup Function
 The setup function can be used to scope your states and links to a single element. Sometimes you have a list of elements which all operate the same but need their own independed states and links. In this case you can use the `setup` function. It takes in an `element` or a `selector` and a `setupFunction` which will be called in a scoped context in which all the link functions like `text`, `attribute`, `model` or `rendered` are automatically scoped to the given element of the `setup` function. You can also return an object at the end of the `setup` function which encapsulates states and function which then will be linked with the [`autoLink`](#auto-link) function.
 You can use it like this:
