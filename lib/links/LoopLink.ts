@@ -1,7 +1,7 @@
 import State from "../states/State";
 import { insertAfter, insertBefore } from "../utils/DOM";
 import StateLink from "./StateLink";
-import { destory as destroyLinks, setup } from "../LinkStateJS";
+import { destory as destroyLinks, LoopSetupInput, setup } from "../LinkStateJS";
 import MutableState from "../states/MutableState";
 
 export default class LoopLink implements StateLink {
@@ -10,16 +10,23 @@ export default class LoopLink implements StateLink {
     private itemName: string;
     private state: State<Iterable<any>>;
     private parentStates: Object;
+    private foreachSetup: ((state: LoopSetupInput) => Object | undefined) | undefined;
 
     private template: Element;
     private loopInstances: Map<Element, StateLink[]>;
     private forComment: Comment;
 
-    constructor(element: Element, itemName: string, state: State<Iterable<any>>, parentStates: Object) {
+    constructor(
+        element: Element,
+        itemName: string,
+        state: State<Iterable<any>>,
+        parentStates: Object,
+        foreachSetup: ((state: LoopSetupInput) => Object | undefined) | undefined) {
         this.element = element;
         this.itemName = itemName;
         this.state = state;
         this.parentStates = parentStates;
+        this.foreachSetup = foreachSetup;
 
         this.template = this.element.cloneNode(true) as Element;
         this.loopInstances = new Map();
@@ -60,6 +67,15 @@ export default class LoopLink implements StateLink {
                     loopState[this.itemName] = new MutableState(loopValue);
                     // @ts-ignore
                     loopState["_index"] = new MutableState(i);
+
+                    if (this.foreachSetup) {
+                        const foreachSetupState = this.foreachSetup({ element: loopElement, states: loopState }) || {};
+                        for (const key of Object.keys(foreachSetupState)) {
+                            // @ts-ignore
+                            loopState[key] = foreachSetupState[key];
+                        }
+                    }
+
                     return loopState;
                 }
             });

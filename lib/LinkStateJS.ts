@@ -172,9 +172,14 @@ export type LoopLinkData = {
     itemName: string,
     state: State<Iterable<any>>,
     parentStates?: Object
+    foreachSetup?: ((state: LoopSetupInput) => Object | undefined) | undefined
 }
-export function loop({ selector, element = fetchElement(selector!), itemName, state, parentStates = {} }: LoopLinkData): LoopLink {
-    const loopLink = new LoopLink(element, itemName, state, parentStates);
+export type LoopSetupInput = {
+    element: Element,
+    states: any
+};
+export function loop({ selector, element = fetchElement(selector!), itemName, state, parentStates = {}, foreachSetup }: LoopLinkData): LoopLink {
+    const loopLink = new LoopLink(element, itemName, state, parentStates, foreachSetup);
     state.subscribe(loopLink);
     return loopLink;
 }
@@ -234,7 +239,10 @@ export function autoLink({ selector, element: appElement = fetchElement(selector
     computeElements(appElement, states, "data-state-foreach", (element: Element, { state, companion: itemName }) => {
         if (!state || !itemName) return;
         element.removeAttribute("data-state-foreach");
-        links.push(loop({ element, state, itemName, parentStates: states }));
+        const foreachSetupName = element.getAttribute("data-state-foreach-setup");
+        // @ts-ignore
+        const foreachSetup: ((state: LoopSetupInput) => Object | undefined) | undefined = foreachSetupName !== null ? states[foreachSetupName] : undefined;
+        links.push(loop({ element, state, itemName, parentStates: states, foreachSetup }));
     });
     computeElements(appElement, states, "data-state-text", (element: Element, { state, statePath }) => {
         if (!state) return;
