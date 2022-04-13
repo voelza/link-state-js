@@ -8,6 +8,7 @@ const elapseDisplay = computed(() => (elapsed.value / 1000).toFixed(1), elapsed)
 const progress = computed(() => elapsed.value / duration.value, elapsed, duration);
 
 let lastTime = performance.now()
+// @ts-ignore
 let handle: number | undefined = undefined;
 const update = () => {
     const time = performance.now()
