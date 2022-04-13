@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>7 7GUIs CRUD</title>
+</head>
+
+<body>
+    <style>
+        * {
+            font-size: inherit;
+        }
+
+        input {
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        select {
+            float: left;
+            margin: 0 1em 1em 0;
+            width: 14em;
+        }
+
+        .buttons {
+            clear: both;
+        }
+
+        button+button {
+            margin-left: 5px;
+        }
+    </style>
+    <div id="app">
+        <div><input data-state-model="prefix" placeholder="Filter prefix"></div>
+
+        <select size="5" data-state-model="selected">
+            <option data-state-foreach="filteredNames@name" data-state-attribute="name@value" data-state-text="name">
+            </option>
+        </select>
+
+        <label>Name: <input data-state-model="first"></label>
+        <label>Surname: <input data-state-model="last"></label>
+
+        <div class="buttons">
+            <button data-state-listener="create@click">Create</button>
+            <button data-state-listener="update@click">Update</button>
+            <button data-state-listener="del@click">Delete</button>
+        </div>
+    </div>
+    <script src="./app.ts" type="module"></script>
+</body>
+
+</html>

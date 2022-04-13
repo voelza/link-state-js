@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>7 7GUIs Index</title>
+</head>
+
+<body>
+    <style>
+        body {
+            margin: 0;
+        }
+
+        table {
+            border-collapse: collapse;
+            table-layout: fixed;
+            width: 99.9%;
+        }
+
+        th {
+            background-color: #eee;
+        }
+
+        tr:first-of-type th {
+            width: 100px;
+        }
+
+        tr:first-of-type th:first-of-type {
+            width: 25px;
+        }
+
+        td {
+            border: 1px solid #ccc;
+            height: 1.5em;
+            overflow: hidden;
+        }
+
+        .cell,
+        .cell input {
+            height: 1.5em;
+            line-height: 1.5;
+            font-size: 15px;
+        }
+
+        .cell span {
+            padding: 0 6px;
+        }
+
+        .cell input {
+            width: 100%;
+            box-sizing: border-box;
+        }
+    </style>
+    <div id="app">
+        <table>
+            <thead>
+                <tr>
+                    <th></th>
+                    <th data-state-foreach="cols@c" data-state-text="c"></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr data-state-foreach="colsLengthAsArray@i">
+                    <th data-state-text="i"></th>
+                    <td data-state-foreach="cols@c" data-state-foreach-setup="cellSetup">
+                        <div class="cell" data-state-attribute="getCell(_index, i)@title"
+                            data-state-listener="setEditing@click">
+                            <input data-state-rendered="editing" data-state-attribute="getCell(_index, i)@value"
+                                data-state-listener="update@change;update@blur">
+                            <span data-state-rendered="notEditing" data-state-text="evalC(cells, _index, i)"></span>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <script src="./app.ts" type="module"></script>
+</body>
+
+</html>

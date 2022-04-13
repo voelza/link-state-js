@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>7GUIs Drawer</title>
+</head>
+
+<body>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+        }
+
+        svg {
+            width: 100vw;
+            height: 100vh;
+            background-color: #eee;
+        }
+
+        circle {
+            stroke: #000;
+        }
+
+        .controls {
+            position: fixed;
+            top: 10px;
+            left: 0;
+            right: 0;
+            text-align: center;
+        }
+
+        .controls button+button {
+            margin-left: 6px;
+        }
+
+        .dialog {
+            position: fixed;
+            top: calc(50% - 50px);
+            left: calc(50% - 175px);
+            background: #fff;
+            width: 350px;
+            height: 100px;
+            padding: 5px 20px;
+            box-sizing: border-box;
+            border-radius: 4px;
+            text-align: center;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.25);
+        }
+
+        .dialog input {
+            display: block;
+            width: 200px;
+            margin: 0px auto;
+        }
+
+        .tip {
+            text-align: center;
+            padding: 0 50px;
+            color: #bbb;
+        }
+    </style>
+    <div id="app">
+        <svg data-state-listener="onClick@click">
+            <foreignObject x="0" y="40%" width="100%" height="200">
+                <p class="tip">
+                    Click on the canvas to draw a circle. Click on a circle to select it.
+                    Right-click on the canvas to adjust the radius of the selected circle.
+                </p>
+            </foreignObject>
+            <circle data-state-foreach="circles@circle" data-state-foreach-setup="circleSetup"
+                data-state-attribute="circle.cx@cx;circle.cy@cy;circle.r@r;fillColor@fill"
+                data-state-listener="setSelected(circle)@click;adjust(circle)@contextmenu"></circle>
+        </svg>
+
+        <div class="controls">
+            <button data-state-listener="undo@click" data-state-attribute="isAtFirstIndex@disabled">Undo</button>
+            <button data-state-listener="redo@click" data-state-attribute="isAtLastIndex@disabled">Redo</button>
+        </div>
+
+        <div class="dialog" data-state-rendered="adjusting">
+            <p>Adjust radius of circle at
+                <span data-state-text="selected.cx"></span>,
+                <span data-state-text="selected.cy"></span>
+            </p>
+            <input type="range" data-state-model="selected.r" min="1" max="300">
+        </div>
+    </div>
+    <script src="./app.ts" type="module"></script>
+</body>
+
+</html>

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>7GUIs Timer</title>
+</head>
+
+<body>
+    <style>
+        .elapsed-container {
+            width: 300px;
+        }
+
+        .elapsed-bar {
+            background-color: red;
+            height: 10px;
+        }
+    </style>
+    <div id="app">
+        <label>Elapsed Time: <progress data-state-attribute="progress@value"></progress></label>
+
+        <div><span data-state-text="elapseDisplay"></span>s</div>
+
+        <div>
+            Duration: <input type="range" data-state-model="duration" min="1" max="30000">
+            <span data-state-text="durationDisplay"></span>s
+        </div>
+
+        <button data-state-listener="reset@click">Reset</button>
+    </div>
+    <script src="./app.ts" type="module"></script>
+</body>
+
+</html>

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>7GUIs Bookers</title>
+</head>
+
+<body>
+    <style>
+        select,
+        input,
+        button {
+            display: block;
+            margin: 0.5em 0;
+            font-size: 15px;
+        }
+
+        input[disabled] {
+            color: #999;
+        }
+
+        p {
+            color: red;
+        }
+    </style>
+    <div id="app">
+        <select data-state-model="flightType">
+            <option value="one-way flight">One-way Flight</option>
+            <option value="return flight">Return Flight</option>
+        </select>
+        <input type="date" data-state-model="departureDate">
+        <input type="date" data-state-model="returnDate" data-state-attribute="isNotReturn@disabled">
+
+        <button data-state-attribute="cantBook@disabled" data-state-listener="book@click">Book</button>
+
+        <p data-state-text="cantBookError"></p>
+    </div>
+    <script src="./app.ts" type="module"></script>
+</body>
+
+</html>
