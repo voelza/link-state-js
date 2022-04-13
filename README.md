@@ -182,7 +182,7 @@ The following `data-state-*` attribute are supported:
 - `data-state-model` to create a [model link](#model-like) like you would with the `model` function. The given value must match one of the state names.
 - `data-state-listener` to create a event-listener. The pattern must be like this `methodName@trigger`, so for example: `counter@click`. The method with the given trigger will automatically bind to the element with the `listener` function you can see [here](#event-listener).
 - `data-state-rendered` to create a [render link](#render-link) like you would with the `rendered` function. The given value must match a boolean-typed state with the given name.
-- `data-state-foreach` to create a [foreach link](#foreach-link) like you would with the `forEach` function. The pattern must match `iterable@loopValueName` where the first refers to the name of an iterable state and the second is the name of the loop value which you can use with `data-data-*` attributes.
+- `data-state-foreach` to create a [foreach link](#foreach-link) like you would with the `forEach` function. The pattern must match `iterable@loopValueName` where the first refers to the name of an iterable state and the second is the name of the loop value which you can use with `data-data-*` attributes. Additionally you can use `data-state-foreach-setup` to link a function which will provide additional states to the for loop state.
 - `data-state-setup` the autoLink version of the `setup` function and is a bit more advanced. See [Setup Function](#setup-function) to read more.
 
 It is possible to pass multiple values to each attribute by using the `;` as a seperator. This is especially necessary for attributes like this `data-state-attribute="widthState@with;heightState@height"`.
