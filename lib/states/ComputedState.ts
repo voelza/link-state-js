@@ -15,9 +15,6 @@ export default class ComputedState<T> implements StateLink, ComputedState<T>, St
         this.parents = parents;
     }
 
-    init(): void {
-    }
-
     update(): void {
         this.value = this.computer();
         this.notify();

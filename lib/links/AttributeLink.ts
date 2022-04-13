@@ -53,7 +53,12 @@ export default class AttributeLink implements StateLink {
         this.element.removeAttribute(this.attributeName);
         const value = this.valueFunction();
         if (!this.isBooleanAttribute || value) {
-            this.element.setAttribute(this.attributeName, this.staticValue ? [this.staticValue, value].join(" ") : value);
+            const val = this.staticValue ? [this.staticValue, value].join(" ") : value;
+            this.element.setAttribute(this.attributeName, val);
+            if (this.attributeName === "value") {
+                // @ts-ignore
+                this.element.value = val;
+            }
         }
     }
 

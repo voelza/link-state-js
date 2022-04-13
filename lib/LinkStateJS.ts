@@ -244,13 +244,33 @@ export function autoLink({ selector, element: appElement = fetchElement(selector
         const foreachSetup: ((state: LoopSetupInput) => Object | undefined) | undefined = foreachSetupName !== null ? states[foreachSetupName] : undefined;
         links.push(loop({ element, state, itemName, parentStates: states, foreachSetup }));
     });
-    computeElements(appElement, states, "data-state-text", (element: Element, { state, statePath }) => {
-        if (!state) return;
-        links.push(text({ element, text: () => getValue(state.value, statePath), states: [state] }));
+    computeElements(appElement, states, "data-state-text", (element: Element, { state, statePath, listener }) => {
+        if (!state && !listener) return;
+        let s: State<any>;
+        let stes: State<any>[];
+        if (!state) {
+            const l = parameterListener(listener!, statePath, states);
+            s = computed(() => l.listener(), ...l.states);
+            stes = l.states;
+        } else {
+            s = state;
+            stes = [state];
+        }
+        links.push(text({ element, text: () => getValue(s!.value, statePath), states: stes }));
     });
-    computeElements(appElement, states, "data-state-attribute", (element: Element, { state, companion: attr, statePath }) => {
-        if (!state || !attr) return;
-        links.push(attribute({ element, name: attr, value: () => getValue(state.value, statePath), states: [state] }));
+    computeElements(appElement, states, "data-state-attribute", (element: Element, { state, companion: attr, statePath, listener }) => {
+        if (!state && !listener && !attr) return;
+        let s: State<any>;
+        let stes: State<any>[];
+        if (!state) {
+            const l = parameterListener(listener!, statePath, states);
+            s = computed(() => l.listener(), ...l.states);
+            stes = l.states;
+        } else {
+            s = state;
+            stes = [state]
+        }
+        links.push(attribute({ element, name: attr!, value: () => getValue(s!.value, statePath), states: stes }));
     });
     computeElements(appElement, states, "data-state-model", (element: Element, { state, statePath }) => {
         if (!state) return;
@@ -258,7 +278,7 @@ export function autoLink({ selector, element: appElement = fetchElement(selector
     });
     computeElements(appElement, states, "data-state-listener", (element: Element, { listener: l, companion: trigger, statePath }) => {
         if (!l || !trigger) return;
-        links.push(listener({ element, trigger, listener: parameterListener(l, statePath, states) as (event: any) => void }));
+        links.push(listener({ element, trigger, listener: parameterListener(l, statePath, states).listener as (event: any) => void }));
     });
     computeElements(appElement, states, "data-state-rendered", (element: Element, { state, statePath }) => {
         if (!state) return;
@@ -309,26 +329,37 @@ function computedObjectState(attr: string, states: any): ComputedState<any> | un
     return undefined;
 }
 
-function parameterListener(listener: Function, statePath: string | undefined, states: any): Function {
+type ParamListener = {
+    listener: Function,
+    states: State<any>[]
+};
+function parameterListener(listener: Function, statePath: string | undefined, states: any): ParamListener {
     const bracketIndex: number | undefined = statePath?.indexOf("(");
     if (bracketIndex && bracketIndex !== -1) {
         const paramStates: StateLookupResult[] = [];
         for (const param of statePath?.substring(bracketIndex + 1, statePath?.indexOf(")"))?.split(",") || []) {
-            const stateResult: StateLookupResult = stateLookup(param, states);
+            const stateResult: StateLookupResult = stateLookup(param.trim(), states);
             if (stateResult.state) {
                 paramStates.push(stateResult);
             }
         }
 
-        return (event: any) => {
-            const args: State<any>[] = [];
-            for (const paramState of paramStates) {
-                args.push(paramState.state!.value);
-            }
-            listener(...args, event)
+        return {
+            listener: (event: any) => {
+                const args: State<any>[] = [];
+                for (const paramState of paramStates) {
+                    args.push(paramState.state!.value);
+                }
+                return listener(...args, event);
+            },
+            // @ts-ignore
+            states: paramStates.map(p => p.state)
         };
     }
-    return listener;
+    return {
+        listener,
+        states: []
+    };
 }
 
 type StateLookupResult = {

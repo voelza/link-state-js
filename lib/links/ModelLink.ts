@@ -21,7 +21,7 @@ export default class AttributeLink implements StateLink {
         this.eventListener = (event: any) => {
             const target: any | null = event.target;
             if (target) {
-                if (this.statePath || !this.state.value) {
+                if (this.statePath && this.state.value) {
                     this.state.value.setValueForPath(this.statePath, target[this.targetAttribute]);
                 } else {
                     this.state.value = target[this.targetAttribute];
