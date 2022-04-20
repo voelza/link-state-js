@@ -58,11 +58,12 @@ As you can see `computed` takes in a coupter function which will represent the s
 
 ## Links
 
-Links are different function which will bind given values to a given element and update whenever one of the given states will change. The following links exist:
+Links are created by different functions which will bind given values to a given element and update whenever one of the given states will change. The following links exist:
 
 - [text](###text-link) to link to the textContent of an element.
 - [textState](###textstate-link) to link to the textContent of an element.
 - [attribute](###attribute-link) to link to an attribute of an element.
+- [attributeState](###attributestate-link) to link to an attribute of an element.
 - [model](###model-link) to link a state to a "value" attribute and add a "input"-event-listener which updates the state whenever the event occurs on the linked element.
 - [rendered](###rendered-link) to remove or add an element whenever a given condition is false or true.
 
