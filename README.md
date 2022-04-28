@@ -1,6 +1,12 @@
 # Link-State-JS
 Very simple JavaScript framework to link DOM elements to states which live in JavaScript. Whenever the state changes the linked DOM elements will change accordingly.
 
+# How to use
+You can simple use the umd build like this:
+```html
+<script src="https://cdn.jsdelivr.net/gh/voelza/link-state-js@v0.1.0/dist/link-state-js.umd.js"></script>
+```
+
 # Syntax
 To declare a state you can use the `state` function. 
 ```typescript
