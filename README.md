@@ -106,7 +106,7 @@ attribute({ selector: "body", name: "style", value: () => `background-color: ${c
 If you only want to link the state of a single state to an element you can use `attributeLink` to create a attribute link. It takes in an `element` or a `selector`, the `name` of the attribute and the `state` which will be used to set the attribute on the element and which will trigger a rerender if it updates.
 ```typescript
 const value = state("This is the value");
-attribute({ selector: "body", name: "value", state: value });
+attributeState({ selector: "body", name: "value", state: value });
 ```
 
 ### Model Link
